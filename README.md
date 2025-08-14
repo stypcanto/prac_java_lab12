@@ -7,6 +7,7 @@ Este proyecto es un ejemplo de aplicación web Java usando **Servlets**, **JSP**
 ## 📂 Estructura del proyecto
 
 ```src
+
 src
 ├── main
 │   ├── java
@@ -22,6 +23,7 @@ src
 │   │   └── cliente.sql                     ← Script SQL para crear/llenar tabla
 │   └── webapp
 │       ├── WEB-INF
+│       │   ├── lib                          ← Carpeta para JARs externos (actualmente vacía)
 │       │   └── web.xml                     ← Configuración de servlet
 │       ├── cliente_form.jsp               ← Formulario para agregar/editar
 │       ├── clientes.jsp                   ← Tabla con lista de clientes
@@ -174,6 +176,8 @@ String pwd = "pass_lab";
 
 ```
 
+
+
 ## Cómo ejecutar
 
 1. Crear la base de datos y la tabla ejecutando `resources/cliente.sql` en MySQL.
@@ -182,8 +186,89 @@ String pwd = "pass_lab";
 
 ## mvn clean package
 
-```less
-4. Copiar el WAR generado a Tomcat o usar Docker para levantar el contenedor.
-5. Acceder a `http://localhost:8080/cliente` para ver la lista de clientes.
+```bash
+# 1. Verificar que las dependencias estén incluidas
+# Listar los JARs de JSTL dentro del WAR
+jar tf target/Lab12-1.0-SNAPSHOT.war | grep jstl
+
+# Debes ver únicamente JSTL 3.0.1
+# WEB-INF/lib/jakarta.servlet.jsp.jstl-api-3.0.1.jar
+# WEB-INF/lib/jakarta.servlet.jsp.jstl-3.0.1.jar
+
+# 2. Copiar el WAR generado a Tomcat o usar Docker para levantar el contenedor
+# Ejemplo con Docker Compose
+docker-compose up -d
+
+# 3. Acceder a la aplicación en el navegador
+# http://localhost:8080/clienteServlet
 
 ```
+
+# Evidencia del Funcionamiento del CRUD de Clientes
+
+Este proyecto implementa un sistema de gestión de clientes utilizando Java Servlets, JSP y JSTL.  
+A continuación se muestran evidencias visuales de las operaciones CRUD: **Crear, Leer, Actualizar y Eliminar**.
+
+---
+
+### 1. Página de Inicio
+La página principal donde se puede acceder a la lista de clientes y las acciones disponibles.
+<p align="center">
+  <img src="Documents/Panel.png" alt="Panel de inicio" width="600"/>
+</p>
+
+---
+
+### 2. Revisando la Base de Datos Inicial
+Tabla de clientes antes de realizar modificaciones.
+<p align="center">
+  <img src="Documents/ListaBD.png" alt="Lista de clientes inicial" width="600"/>
+</p>
+
+---
+
+### 3. Formulario para Nuevo Cliente
+Formulario para agregar un cliente nuevo al sistema.
+<p align="center">
+  <img src="Documents/NuevoCliente.png" alt="Formulario nuevo cliente" width="600"/>
+</p>
+
+---
+
+### 4. Registrando un Nuevo Cliente
+Se muestra el formulario lleno con los datos del nuevo cliente.
+<p align="center">
+  <img src="Documents/NuevoClienteLlenado.png" alt="Nuevo cliente llenado" width="600"/>
+</p>
+
+---
+
+### 5. Base de Datos Actualizada
+La tabla ahora incluye el nuevo registro agregado.
+<p align="center">
+  <img src="Documents/ListaBDLlenado.png" alt="Lista de clientes actualizada" width="600"/>
+</p>
+
+---
+
+### 6. Editando un Registro
+Ejemplo de modificación de un cliente existente para completar información faltante.
+<p align="center">
+  <img src="Documents/ListaBDEditado.png" alt="Cliente editado" width="600"/>
+</p>
+
+---
+
+### 7. Eliminando un Registro
+Se realiza la eliminación de un cliente específico del sistema.
+<p align="center">
+  <img src="Documents/BorrandoUsuarioPerezGomez.png" alt="Eliminando cliente" width="600"/>
+</p>
+
+---
+
+### 8. Tabla Actualizada
+La tabla final refleja la eliminación del cliente "Perez Gomez".
+<p align="center">
+  <img src="Documents/ListaBDLLenadoyEliminado.png" alt="Lista final de clientes" width="600"/>
+</p>

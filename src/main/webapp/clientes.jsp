@@ -1,5 +1,11 @@
-<%@ taglib prefix="c" uri="http://jakarta.ee/jstl/core" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page contentType="text/html;charset=UTF-8" %>
+<%--
+    Esta página muestra la lista de clientes que el servlet nos pasa en la variable "clientes".
+    Usamos JSTL para recorrer la lista y mostrar cada cliente en una tabla.
+--%>
+
 <html>
 <head>
     <title>Gestión de Clientes</title>
@@ -9,9 +15,9 @@
 
 <h2 style="text-align:center; color:#0C4163;">Gestión de Clientes</h2>
 
-<!-- Botón para agregar nuevo cliente -->
+<!-- Botón para agregar un cliente nuevo -->
 <div style="text-align:center; margin-bottom:15px;">
-    <a href="cliente_form.jsp?action=add">
+    <a href="clienteServlet?action=add">
         <button>Nuevo Cliente</button>
     </a>
 </div>
@@ -34,6 +40,7 @@
     </tr>
     </thead>
     <tbody>
+    <%-- Recorremos cada cliente con JSTL --%>
     <c:forEach var="c" items="${clientes}">
         <tr>
             <td>${c.idcliente}</td>
@@ -45,13 +52,15 @@
             <td>${c.referencia}</td>
             <td>${c.genero}</td>
             <td>${c.estado}</td>
+            <!-- Botón para editar el cliente -->
             <td>
-                <a href="cliente_form.jsp?action=edit&id=${c.idcliente}">
+                <a href="clienteServlet?action=edit&id=${c.idcliente}">
                     <img src="images/upd.png" alt="Editar"/>
                 </a>
             </td>
+            <!-- Botón para eliminar el cliente -->
             <td>
-                <a href="ClienteServlet?action=delete&id=${c.idcliente}" onclick="return confirm('¿Eliminar este cliente?');">
+                <a href="clienteServlet?action=delete&id=${c.idcliente}" onclick="return confirm('¿Eliminar este cliente?');">
                     <img src="images/del.png" alt="Eliminar"/>
                 </a>
             </td>

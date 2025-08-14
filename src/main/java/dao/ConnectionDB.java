@@ -20,20 +20,24 @@ public class ConnectionDB {
 	public Connection getConnection() throws SQLException, ClassNotFoundException {
 		String driver = "com.mysql.cj.jdbc.Driver";
 
-		// Si corres el backend en el mismo docker-compose, usa "mysql-db" como host
-		String host = "mysql-db";
+		// Datos de conexión para Docker Compose
+		String host = "mysql-db";       // nombre del servicio en docker-compose
 		String port = "3306";
 		String database = "laboratorio";
 		String user = "usuario_lab";
-		String pwd = "pass_lab";
+		String password = "pass_lab";
 
-		// JDBC URL con parámetros para evitar problemas de SSL y Public Key Retrieval
+		// Cargar driver
+		Class.forName(driver);
+
+		// URL JDBC
 		String url = String.format(
 				"jdbc:mysql://%s:%s/%s?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false",
 				host, port, database
 		);
 
-		Class.forName(driver);
-		return DriverManager.getConnection(url, user, pwd);
+		// Retornar conexión
+		return DriverManager.getConnection(url, user, password);
 	}
 }
+
