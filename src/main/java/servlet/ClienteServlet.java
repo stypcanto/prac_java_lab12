@@ -13,108 +13,149 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-// Esto le dice a Tomcat que cuando alguien entre a /clienteServlet
-// este servlet debe manejar la solicitud
+/*
+    Esto le dice a Tomcat que cuando alguien abra
+    /clienteServlet, este servlet se encargará de procesarlo.
+*/
 @WebServlet(name = "ClienteServlet", value = "/clienteServlet")
 public class ClienteServlet extends HttpServlet {
 
-    // Este método procesa todas las solicitudes
+    /**
+     * Este método es como el "cerebro" del servlet.
+     * Recibe todas las solicitudes (agregar, editar, borrar, listar)
+     * y decide qué hacer con cada una.
+     *
+     * @param request lo que nos envía el navegador
+     * @param response lo que vamos a devolver al navegador
+     * @throws ServletException, IOException si algo sale mal
+     */
     private void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException, SQLException, ClassNotFoundException {
+            throws ServletException, IOException {
 
-        // Creamos nuestro objeto DAO para hablar con la base de datos
-        IClienteDAO dao = new ClienteDAOImpl();
+        IClienteDAO dao = null; // nuestro "teléfono" para hablar con la base de datos
 
-        // Leemos la acción que el usuario quiere hacer (list, add, edit, delete, save)
-        String action = request.getParameter("action");
-        if (action == null) {
-            action = "list"; // Si no viene acción, mostramos la lista
+        try {
+            dao = new ClienteDAOImpl(); // nos conectamos a la base de datos
+
+            // Leemos qué acción quiere hacer el usuario
+            String action = request.getParameter("action");
+            if (action == null) action = "list"; // si no dice nada, mostramos la lista
+
+            switch (action) {
+
+                case "list":
+                    // 1️⃣ Listar todos los clientes
+                    List<ClienteDTO> clientes = dao.getAll(); // pedimos todos los clientes
+                    request.setAttribute("clientes", clientes); // guardamos la lista para el JSP
+                    request.getRequestDispatcher("/clientes.jsp").forward(request, response); // vamos a la lista
+                    break;
+
+                case "add":
+                    // 2️⃣ Abrir formulario vacío para agregar un nuevo cliente
+                    request.setAttribute("cliente", new ClienteDTO()); // cliente vacío
+                    request.setAttribute("isEdit", false); // no es edición
+                    request.getRequestDispatcher("/cliente_form.jsp").forward(request, response);
+                    break;
+
+                case "edit":
+                    // 3️⃣ Abrir formulario con datos del cliente para editar
+                    Long idEdit = Long.parseLong(request.getParameter("id")); // leemos el id
+                    ClienteDTO clienteEdit = dao.get(idEdit); // pedimos los datos de la base de datos
+
+                    if (clienteEdit == null) {
+                        // Si no encontramos al cliente, volvemos a la lista
+                        response.sendRedirect("clienteServlet");
+                        return;
+                    }
+
+                    request.setAttribute("cliente", clienteEdit); // guardamos para el formulario
+                    request.setAttribute("isEdit", true); // es edición
+                    request.getRequestDispatcher("/cliente_form.jsp").forward(request, response);
+                    break;
+
+                case "delete":
+                    // 4️⃣ Borrar un cliente
+                    Long idDel = Long.parseLong(request.getParameter("id"));
+                    dao.del(idDel); // borramos en la base de datos
+                    response.sendRedirect("clienteServlet"); // volvemos a la lista
+                    break;
+
+                case "save":
+                    // 5️⃣ Guardar cliente (nuevo o editado)
+                    String idStr = request.getParameter("idcliente");
+                    Long idCliente = (idStr == null || idStr.isEmpty()) ? null : Long.parseLong(idStr);
+
+                    // Creamos un objeto ClienteDTO con todos los datos del formulario
+                    ClienteDTO clienteSave = new ClienteDTO();
+                    clienteSave.setIdcliente(idCliente); // importante para update
+                    clienteSave.setAppaterno(request.getParameter("appaterno"));
+                    clienteSave.setApmaterno(request.getParameter("apmaterno"));
+                    clienteSave.setNombres(request.getParameter("nombres"));
+
+                    // Validamos fecha: si viene vacía, ponemos null
+                    String fecha = request.getParameter("nacimiento");
+                    if (fecha != null && !fecha.isEmpty()) {
+                        try {
+                            clienteSave.setNacimiento(java.sql.Date.valueOf(fecha));
+                        } catch (IllegalArgumentException e) {
+                            clienteSave.setNacimiento(null);
+                        }
+                    }
+
+                    clienteSave.setDireccion(request.getParameter("direccion"));
+                    clienteSave.setReferencia(request.getParameter("referencia"));
+                    clienteSave.setGenero(request.getParameter("genero"));
+
+                    // Validamos estado: si viene vacío, ponemos 0
+                    String estadoStr = request.getParameter("estado");
+                    clienteSave.setEstado((estadoStr == null || estadoStr.isEmpty()) ? 0 : Integer.parseInt(estadoStr));
+
+                    if (idCliente == null) {
+                        // ✅ Si no tiene ID, es nuevo -> agregamos
+                        dao.add(clienteSave);
+                    } else {
+                        // ✅ Si tiene ID, ya existe -> actualizamos
+                        // Esto evita duplicados porque solo hace UPDATE
+                        dao.update(clienteSave);
+                    }
+
+                    response.sendRedirect("clienteServlet"); // volvemos a la lista
+                    break;
+
+                default:
+                    // Acción desconocida -> mostramos la lista
+                    response.sendRedirect("clienteServlet");
+            }
+
+        } catch (SQLException | ClassNotFoundException e) {
+            // Si algo sale mal, avisamos con detalle
+            throw new ServletException("Error al procesar la solicitud del cliente", e);
+        } finally {
+            // Cerramos la conexión aunque ocurra un error
+            if (dao != null) {
+                try { dao.close(); } catch (SQLException ignored) {}
+            }
         }
-
-        switch (action) {
-            case "list":
-                // Listar todos los clientes
-                List<ClienteDTO> clientes = dao.getAll();
-                request.setAttribute("clientes", clientes);
-                request.getRequestDispatcher("/clientes.jsp").forward(request, response);
-                break;
-
-            case "add":
-                // Abrir formulario vacío para agregar un nuevo cliente
-                request.setAttribute("cliente", new ClienteDTO());
-                request.getRequestDispatcher("/cliente_form.jsp").forward(request, response);
-                break;
-
-            case "edit":
-                // Abrir formulario con datos del cliente para editar
-                Long idEdit = Long.parseLong(request.getParameter("id"));
-                ClienteDTO clienteEdit = dao.get(idEdit);
-                request.setAttribute("cliente", clienteEdit);
-                request.getRequestDispatcher("/cliente_form.jsp").forward(request, response);
-                break;
-
-            case "delete":
-                // Eliminar un cliente
-                Long idDel = Long.parseLong(request.getParameter("id"));
-                dao.del(idDel);
-                response.sendRedirect("clienteServlet"); // Volvemos a la lista
-                break;
-
-            case "save":
-                // Guardar cliente (nuevo o editado)
-                String idStr = request.getParameter("idcliente");
-                Long idCliente = (idStr == null || idStr.isEmpty()) ? null : Long.parseLong(idStr);
-
-                ClienteDTO clienteSave = new ClienteDTO();
-                clienteSave.setIdcliente(idCliente);
-                clienteSave.setAppaterno(request.getParameter("appaterno"));
-                clienteSave.setApmaterno(request.getParameter("apmaterno"));
-                clienteSave.setNombres(request.getParameter("nombres"));
-                // Convertimos fecha (simple, puede mejorarse con DateFormat)
-                String fecha = request.getParameter("nacimiento");
-                clienteSave.setNacimiento((fecha == null || fecha.isEmpty()) ? null : java.sql.Date.valueOf(fecha));
-                clienteSave.setDireccion(request.getParameter("direccion"));
-                clienteSave.setReferencia(request.getParameter("referencia"));
-                clienteSave.setGenero(request.getParameter("genero"));
-                String estadoStr = request.getParameter("estado");
-                clienteSave.setEstado((estadoStr == null || estadoStr.isEmpty()) ? 0 : Integer.parseInt(estadoStr));
-
-                if (idCliente == null) {
-                    // Si no tiene ID, es nuevo -> agregamos
-                    dao.add(clienteSave);
-                } else {
-                    // Si tiene ID, ya existe -> actualizamos
-                    dao.update(clienteSave);
-                }
-
-                // Volvemos a la lista de clientes
-                response.sendRedirect("clienteServlet");
-                break;
-
-            default:
-                // Acción desconocida, mostramos la lista
-                response.sendRedirect("clienteServlet");
-        }
-
-        // Cerramos la conexión al final
-        dao.close();
     }
 
-    // GET maneja solicitudes de solo leer (como listar, abrir formulario)
+    /**
+     * @Override significa: "Estoy sobrescribiendo un método de HttpServlet"
+     * doGet se ejecuta cuando alguien abre una página (GET)
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        try {
-            processRequest(request, response);
-        } catch (SQLException | ClassNotFoundException e) {
-            throw new ServletException("Error al procesar la solicitud del cliente", e);
-        }
+        processRequest(request, response); // llamamos al método central
     }
 
-    // POST maneja solicitudes que envían datos (como guardar)
+    /**
+     * @Override significa: "Estoy sobrescribiendo un método de HttpServlet"
+     * doPost se ejecuta cuando alguien envía un formulario (POST)
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        doGet(request, response); // Redirigimos a processRequest para simplificar
+        request.setCharacterEncoding("UTF-8"); // importante para acentos y ñ
+        processRequest(request, response); // llamamos al método central
     }
 }

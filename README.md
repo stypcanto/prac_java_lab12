@@ -184,7 +184,14 @@ String pwd = "pass_lab";
 2. Configurar los datos de conexión en `ConnectionDB.java`.
 3. Construir el proyecto con Maven:
 
-## mvn clean package
+```bash
+docker-compose down           # Para los contenedores actuales
+docker-compose build          # Reconstruye la imagen con tu WAR nuevo
+docker-compose up -d          # Levanta los contenedores con la nueva imagen
+
+
+```
+## Verificar los JAR
 
 ```bash
 # 1. Verificar que las dependencias estén incluidas
@@ -246,7 +253,7 @@ Se muestra el formulario lleno con los datos del nuevo cliente.
 ### 5. Base de Datos Actualizada
 La tabla ahora incluye el nuevo registro agregado.
 <p align="center">
-  <img src="Documents/ListaBDLlenado.png" alt="Lista de clientes actualizada" width="600"/>
+  <img src="Documents/ListaBDLlenado.png" alt="Lista de clientes actualizada" width="800"/>
 </p>
 
 ---
@@ -262,7 +269,7 @@ Ejemplo de modificación de un cliente existente para completar información fal
 ### 7. Eliminando un Registro
 Se realiza la eliminación de un cliente específico del sistema.
 <p align="center">
-  <img src="Documents/BorrandoUsuarioPerezGomez.png" alt="Eliminando cliente" width="600"/>
+  <img src="Documents/BorrandoUsuarioPerezGomez.png" alt="Eliminando cliente" width="800"/>
 </p>
 
 ---
@@ -270,5 +277,5 @@ Se realiza la eliminación de un cliente específico del sistema.
 ### 8. Tabla Actualizada
 La tabla final refleja la eliminación del cliente "Perez Gomez".
 <p align="center">
-  <img src="Documents/ListaBDLLenadoyEliminado.png" alt="Lista final de clientes" width="600"/>
+  <img src="Documents/ListaBDLLenadoyEliminado.png" alt="Lista final de clientes" width="800"/>
 </p>
