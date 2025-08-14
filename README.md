@@ -254,7 +254,7 @@ La tabla ahora incluye el nuevo registro agregado.
 ### 6. Editando un Registro
 Ejemplo de modificación de un cliente existente para completar información faltante.
 <p align="center">
-  <img src="Documents/ListaBDEditado.png" alt="Cliente editado" width="600"/>
+  <img src="Documents/EditandoDomicilio.png" alt="Cliente editado" width="600"/>
 </p>
 
 ---
