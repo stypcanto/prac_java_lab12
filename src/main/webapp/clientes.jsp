@@ -1,14 +1,23 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="c" uri="http://jakarta.ee/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-    <title>Lista de profesores</title>
+    <title>Gestión de Clientes</title>
     <link rel="stylesheet" type="text/css" href="css/table.css"/>
-
 </head>
 <body>
+
+<h2 style="text-align:center; color:#0C4163;">Gestión de Clientes</h2>
+
+<!-- Botón para agregar nuevo cliente -->
+<div style="text-align:center; margin-bottom:15px;">
+    <a href="cliente_form.jsp?action=add">
+        <button>Nuevo Cliente</button>
+    </a>
+</div>
+
 <table class="navy">
-    <caption>Lista de Profesores</caption>
+    <caption>Lista de Clientes</caption>
     <thead>
     <tr>
         <th>Id</th>
@@ -16,40 +25,40 @@
         <th>Apellido Materno</th>
         <th>Nombres</th>
         <th>F. Nacimiento</th>
-        <th>Direccion</th>
+        <th>Dirección</th>
         <th>Referencia</th>
-        <th>Genero</th>
+        <th>Género</th>
         <th>Estado</th>
-        <th> <img src="images/ins.png" /> </th>
-        <th><img src="images/del.png" /></th>
-        <th> <img src="images/upd.png" /> </th>
+        <th>Editar</th>
+        <th>Eliminar</th>
     </tr>
     </thead>
     <tbody>
     <c:forEach var="c" items="${clientes}">
         <tr>
-            <td>${c.getIdcliente()} </td>
-            <td>${c.getAppaterno()} </td>
-            <td>${c.getApmaterno()} </td>
-            <td>${c.getNombres()} </td>
-            <td>${c.getNacimiento()} </td>
-            <td>${c.getDireccion()} </td>
-            <td>${c.getReferencia()} </td>
-            <td>${c.getGenero()} </td>
-            <td colspan="2">${c.getEstado()} </td>
-            <td><input type="checkbox" name="chk_del" value="${c.getIdcliente()}"/></td>
-            <td><input type="radio" name="rad_upd" value="${c.getIdcliente()}"/></td>
+            <td>${c.idcliente}</td>
+            <td>${c.appaterno}</td>
+            <td>${c.apmaterno}</td>
+            <td>${c.nombres}</td>
+            <td>${c.nacimiento}</td>
+            <td>${c.direccion}</td>
+            <td>${c.referencia}</td>
+            <td>${c.genero}</td>
+            <td>${c.estado}</td>
+            <td>
+                <a href="cliente_form.jsp?action=edit&id=${c.idcliente}">
+                    <img src="images/upd.png" alt="Editar"/>
+                </a>
+            </td>
+            <td>
+                <a href="ClienteServlet?action=delete&id=${c.idcliente}" onclick="return confirm('¿Eliminar este cliente?');">
+                    <img src="images/del.png" alt="Eliminar"/>
+                </a>
+            </td>
         </tr>
     </c:forEach>
     </tbody>
-    <tfoot>
-    <tr><td colspan="12">
-        Listado de clientes</td>
-    </tr>
-
-    </tfoot>
 </table>
-
 
 </body>
 </html>
